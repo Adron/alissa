@@ -1,0 +1,147 @@
+/* System Mode (Light/Dark) */
+@media (prefers-color-scheme: light) {
+    .theme-system {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --border-color: #dddddd;
+        --button-bg: #2196F3;
+        --button-hover: #1976D2;
+        --button-text: #ffffff;
+        --exit-button-bg: #f44336;
+        --exit-button-hover: #d32f2f;
+        --view-button-bg: #4CAF50;
+        --view-button-hover: #45a049;
+        --view-button-disabled: #cccccc;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .theme-system {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --border-color: #444444;
+        --button-bg: #1976D2;
+        --button-hover: #1565C0;
+        --button-text: #ffffff;
+        --exit-button-bg: #d32f2f;
+        --exit-button-hover: #b71c1c;
+        --view-button-bg: #388E3C;
+        --view-button-hover: #2E7D32;
+        --view-button-disabled: #666666;
+    }
+}
+
+/* Maddening Darkness Theme */
+.theme-maddening-darkness {
+    --bg-primary: #000000;
+    --bg-secondary: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --border-color: #333333;
+    --button-bg: #8B0000;
+    --button-hover: #660000;
+    --button-text: #ffffff;
+    --exit-button-bg: #8B0000;
+    --exit-button-hover: #660000;
+    --view-button-bg: #8B0000;
+    --view-button-hover: #660000;
+    --view-button-disabled: #333333;
+}
+
+/* Hot Spastic Sassy Theme */
+.theme-hot-spastic-sassy {
+    --bg-primary: #FF69B4;
+    --bg-secondary: #FF1493;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border-color: #FF00FF;
+    --button-bg: #00FF00;
+    --button-hover: #00CC00;
+    --button-text: #000000;
+    --exit-button-bg: #FF0000;
+    --exit-button-hover: #CC0000;
+    --view-button-bg: #00FF00;
+    --view-button-hover: #00CC00;
+    --view-button-disabled: #FFB6C1;
+}
+
+/* Blue Wave Theme */
+.theme-blue-wave {
+    --bg-primary: #1a237e;
+    --bg-secondary: #0d47a1;
+    --text-primary: #ffffff;
+    --text-secondary: #e3f2fd;
+    --border-color: #2196f3;
+    --button-bg: #2196f3;
+    --button-hover: #1976d2;
+    --button-text: #ffffff;
+    --exit-button-bg: #f50057;
+    --exit-button-hover: #c51162;
+    --view-button-bg: #2196f3;
+    --view-button-hover: #1976d2;
+    --view-button-disabled: #90caf9;
+}
+
+/* Apply theme variables to elements */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.modal-content {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.view-selection {
+    border-right-color: var(--border-color);
+}
+
+h2 {
+    color: var(--text-primary);
+}
+
+.setting-group label {
+    color: var(--text-primary);
+}
+
+.setting-control {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.browse-button {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+}
+
+.browse-button:hover {
+    background-color: var(--button-hover);
+}
+
+.exit-button {
+    background-color: var(--exit-button-bg);
+    color: var(--button-text);
+}
+
+.exit-button:hover {
+    background-color: var(--exit-button-hover);
+}
+
+.view-button {
+    background-color: var(--view-button-bg);
+    color: var(--button-text);
+}
+
+.view-button:hover {
+    background-color: var(--view-button-hover);
+}
+
+.view-button:disabled {
+    background-color: var(--view-button-disabled);
+} 
