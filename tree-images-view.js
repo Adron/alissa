@@ -259,6 +259,8 @@ function buildDirectoryTree(directory) {
                 li.dataset.path = path.join(dir, folder.name);
                 console.log('Creating tree item for:', folder.name);
                 
+                const itemContent = document.createElement('div');
+                
                 // Create expand/collapse indicator
                 const expandIcon = document.createElement('span');
                 expandIcon.className = 'expand-icon';
@@ -274,11 +276,19 @@ function buildDirectoryTree(directory) {
                 folderName.className = 'folder-name';
                 folderName.textContent = folder.name;
                 
-                li.appendChild(expandIcon);
-                li.appendChild(folderIcon);
-                li.appendChild(folderName);
+                itemContent.appendChild(expandIcon);
+                itemContent.appendChild(folderIcon);
+                itemContent.appendChild(folderName);
+                li.appendChild(itemContent);
                 
-                li.addEventListener('click', () => {
+                // Recursively build tree for subdirectories
+                const subUl = document.createElement('ul');
+                subUl.style.display = 'none';
+                li.appendChild(subUl);
+                
+                // Add click handler for selection
+                itemContent.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     console.log('Folder clicked:', folder.name);
                     // Remove selected class from all items
                     document.querySelectorAll('.directory-tree li').forEach(item => {
@@ -291,18 +301,8 @@ function buildDirectoryTree(directory) {
                     // Update current directory and display contents
                     currentDirectory = li.dataset.path;
                     displayCurrentDirectoryContents();
-                });
-                
-                parentElement.appendChild(li);
-                
-                // Recursively build tree for subdirectories
-                const subUl = document.createElement('ul');
-                subUl.style.display = 'none';
-                li.appendChild(subUl);
-                
-                // Add click handler to toggle subdirectories
-                li.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    
+                    // Toggle expand/collapse
                     const isHidden = subUl.style.display === 'none';
                     console.log(`Toggling ${folder.name} visibility:`, isHidden ? 'showing' : 'hiding');
                     subUl.style.display = isHidden ? 'block' : 'none';
@@ -316,6 +316,8 @@ function buildDirectoryTree(directory) {
                         buildTree(path.join(dir, folder.name), subUl, level + 1);
                     }
                 });
+                
+                parentElement.appendChild(li);
             });
         } catch (error) {
             console.error(`Error reading directory ${dir}:`, error);
@@ -325,6 +327,8 @@ function buildDirectoryTree(directory) {
     // Start with the root directory
     const rootLi = document.createElement('li');
     rootLi.dataset.path = directory;
+    
+    const rootContent = document.createElement('div');
     
     const expandIcon = document.createElement('span');
     expandIcon.className = 'expand-icon';
@@ -339,15 +343,17 @@ function buildDirectoryTree(directory) {
     rootName.className = 'folder-name';
     rootName.textContent = path.basename(directory);
     
-    rootLi.appendChild(expandIcon);
-    rootLi.appendChild(rootIcon);
-    rootLi.appendChild(rootName);
-    directoryTree.appendChild(rootLi);
+    rootContent.appendChild(expandIcon);
+    rootContent.appendChild(rootIcon);
+    rootContent.appendChild(rootName);
+    rootLi.appendChild(rootContent);
     
     // Create sub-ul for root directory
     const rootSubUl = document.createElement('ul');
     rootSubUl.style.display = 'block'; // Show root level by default
     rootLi.appendChild(rootSubUl);
+    
+    directoryTree.appendChild(rootLi);
     
     // Build the tree starting from root
     buildTree(directory, rootSubUl);
