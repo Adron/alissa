@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Event Console</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        #console {
+            height: calc(100vh - 20px);
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+        .timestamp {
+            color: #6a9955;
+        }
+        .event-type {
+            color: #569cd6;
+        }
+        .event-data {
+            color: #d4d4d4;
+        }
+    </style>
+</head>
+<body>
+    <div id="console"></div>
+    <script src="console-window.js"></script>
+</body>
+</html> 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alissa Monitor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        #console {
+            padding: 10px;
+            height: 100vh;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+        .timestamp {
+            color: #6a9955;
+            margin-right: 10px;
+        }
+        .event-type {
+            color: #569cd6;
+            font-weight: bold;
+        }
+        .info {
+            color: #d4d4d4;
+        }
+        .error {
+            color: #f14c4c;
+        }
+        .warning {
+            color: #dcdcaa;
+        }
+        .success {
+            color: #4ec9b0;
+        }
+    </style>
+</head>
+<body>
+    <div id="console"></div>
+    <script src="monitor-window.js"></script>
+</body>
+</html> 

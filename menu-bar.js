@@ -7,6 +7,11 @@ class MenuBar {
         
         this.createMenuItems();
         this.createHelpDialog();
+        
+        // Listen for console menu updates
+        require('electron').ipcRenderer.on('update-console-menu', (event, isConsoleOpen) => {
+            this.updateConsoleMenuItem(isConsoleOpen);
+        });
     }
     
     createMenuItems() {
@@ -26,6 +31,13 @@ class MenuBar {
                     { label: 'Tag', action: 'tagFile' },
                     { label: 'Properties', action: 'showProperties' },
                     { label: 'Open', action: 'openFile' }
+                ]
+            },
+            {
+                label: 'View',
+                id: 'view-menu',
+                items: [
+                    { label: 'Show Console', action: 'showConsole' }
                 ]
             },
             {
@@ -123,6 +135,9 @@ class MenuBar {
             case 'openSettings':
                 require('electron').ipcRenderer.send('open-modal');
                 break;
+            case 'showConsole':
+                require('electron').ipcRenderer.send('show-console');
+                break;
             case 'showHelp':
                 const helpDialog = document.getElementById('help-dialog');
                 helpDialog.style.display = 'block';
@@ -134,6 +149,19 @@ class MenuBar {
                 break;
             default:
                 console.log(`Action not implemented: ${action}`);
+        }
+    }
+    
+    updateConsoleMenuItem(isConsoleOpen) {
+        const viewMenu = document.getElementById('view-menu');
+        if (viewMenu) {
+            const submenu = viewMenu.querySelector('.submenu');
+            if (submenu) {
+                const consoleItem = submenu.querySelector('.submenu-item');
+                if (consoleItem) {
+                    consoleItem.textContent = isConsoleOpen ? 'Close Console' : 'Show Console';
+                }
+            }
         }
     }
 }

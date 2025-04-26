@@ -237,27 +237,51 @@ function getFolderIcon(isOpen = false) {
     return isOpen ? '📂' : '📁';
 }
 
-// Build the directory tree
+// Update the logEvent function to use ipcRenderer directly
+function logEvent(type, data) {
+    console.log(`[Renderer] ${type}:`, data); // Debug log
+    ipcRenderer.send('console-event', type, data);
+}
+
+// Modify buildDirectoryTree to ensure events are sent
 function buildDirectoryTree(directory) {
-    console.log('Building tree for directory:', directory);
+    console.log('Starting to build directory tree for:', directory); // Debug log
+    logEvent('tree', { action: 'building', directory });
     directoryTree.innerHTML = '';
     
     function buildTree(dir, parentElement, level = 0) {
         try {
-            console.log(`Reading directory at level ${level}:`, dir);
+            console.log(`Reading directory at level ${level}:`, dir); // Debug log
             const items = fs.readdirSync(dir, { withFileTypes: true });
             const folders = items.filter(item => item.isDirectory());
-            console.log(`Found ${folders.length} folders in ${dir}`);
+            
+            // Log the directory contents
+            logEvent('tree', { 
+                action: 'reading', 
+                directory: dir, 
+                level, 
+                foldersFound: folders.length,
+                totalItems: items.length,
+                folders: folders.map(f => f.name)
+            });
             
             if (folders.length === 0) {
-                console.log('No folders found in:', dir);
+                logEvent('tree', { action: 'no-folders', directory: dir });
                 return;
             }
             
             folders.forEach(folder => {
                 const li = document.createElement('li');
-                li.dataset.path = path.join(dir, folder.name);
-                console.log('Creating tree item for:', folder.name);
+                const folderPath = path.join(dir, folder.name);
+                li.dataset.path = folderPath;
+                
+                // Log each folder creation
+                logEvent('tree', {
+                    action: 'folder-added',
+                    folder: folder.name,
+                    path: folderPath,
+                    level: level
+                });
                 
                 const itemContent = document.createElement('div');
                 
@@ -289,9 +313,26 @@ function buildDirectoryTree(directory) {
                 // Add click handler for selection
                 itemContent.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    console.log('Folder clicked:', folder.name);
+                    console.log('Folder clicked:', folder.name); // Debug log
+                    
+                    // Log selection before any changes
+                    logEvent('navigation', { 
+                        type: 'folder',
+                        action: 'selected',
+                        folder: folder.name,
+                        path: folderPath,
+                        level: level
+                    });
+                    
                     // Remove selected class from all items
                     document.querySelectorAll('.directory-tree li').forEach(item => {
+                        if (item.classList.contains('selected')) {
+                            logEvent('navigation', {
+                                type: 'folder',
+                                action: 'deselected',
+                                path: item.dataset.path
+                            });
+                        }
                         item.classList.remove('selected');
                     });
                     
@@ -299,20 +340,38 @@ function buildDirectoryTree(directory) {
                     li.classList.add('selected');
                     
                     // Update current directory and display contents
-                    currentDirectory = li.dataset.path;
+                    const previousDirectory = currentDirectory;
+                    currentDirectory = folderPath;
+                    
+                    // Log directory change
+                    logEvent('navigation', {
+                        type: 'directory',
+                        action: 'changed',
+                        from: previousDirectory,
+                        to: folderPath
+                    });
+                    
                     displayCurrentDirectoryContents();
                     
                     // Toggle expand/collapse
                     const isHidden = subUl.style.display === 'none';
-                    console.log(`Toggling ${folder.name} visibility:`, isHidden ? 'showing' : 'hiding');
-                    subUl.style.display = isHidden ? 'block' : 'none';
+                    logEvent('tree', { 
+                        action: 'toggle-expand', 
+                        folder: folder.name,
+                        expanded: isHidden,
+                        path: folderPath
+                    });
                     
-                    // Update expand/collapse icon and folder icon
+                    subUl.style.display = isHidden ? 'block' : 'none';
                     expandIcon.innerHTML = isHidden ? '▼' : '▶';
                     folderIcon.src = getFolderIcon(isHidden);
                     
-                    // Only build subdirectories when first expanded
                     if (isHidden && subUl.children.length === 0) {
+                        logEvent('tree', {
+                            action: 'expanding-subtree',
+                            folder: folder.name,
+                            path: folderPath
+                        });
                         buildTree(path.join(dir, folder.name), subUl, level + 1);
                     }
                 });
@@ -320,7 +379,13 @@ function buildDirectoryTree(directory) {
                 parentElement.appendChild(li);
             });
         } catch (error) {
-            console.error(`Error reading directory ${dir}:`, error);
+            console.error('Error in buildTree:', error); // Debug log
+            logEvent('error', { 
+                type: 'directory-read', 
+                directory: dir, 
+                error: error.message,
+                stack: error.stack
+            });
         }
     }
     
@@ -359,59 +424,101 @@ function buildDirectoryTree(directory) {
     buildTree(directory, rootSubUl);
 }
 
-// Display contents of current directory
+// Modify displayCurrentDirectoryContents to ensure events are sent
 function displayCurrentDirectoryContents() {
+    console.log('Displaying contents for:', currentDirectory); // Debug log
+    logEvent('files', { 
+        action: 'displaying', 
+        directory: currentDirectory 
+    });
+    
     filesGrid.innerHTML = '';
     currentPathDisplay.textContent = currentDirectory;
     
     try {
         const items = fs.readdirSync(currentDirectory, { withFileTypes: true });
-        
-        // Sort items: folders first, then files
-        items.sort((a, b) => {
-            if (a.isDirectory() && !b.isDirectory()) return -1;
-            if (!a.isDirectory() && b.isDirectory()) return 1;
-            return a.name.localeCompare(b.name);
+        const files = items
+            .filter(item => !item.isDirectory())
+            .sort((a, b) => a.name.localeCompare(b.name));
+            
+        // Log the file list
+        logEvent('files', { 
+            action: 'read', 
+            directory: currentDirectory,
+            totalItems: items.length,
+            filesFound: files.length,
+            files: files.map(f => ({
+                name: f.name,
+                isImage: isImageFile(f.name)
+            }))
         });
         
-        items.forEach(item => {
+        files.forEach(file => {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
+            fileItem.dataset.path = path.join(currentDirectory, file.name);
             
             let iconElement;
-            if (item.isDirectory()) {
-                iconElement = document.createElement('div');
-                iconElement.className = 'file-icon';
-                iconElement.textContent = '📁';
-            } else if (isImageFile(item.name)) {
+            if (isImageFile(file.name)) {
                 iconElement = createImageThumbnail(
-                    path.join(currentDirectory, item.name),
-                    item.name
+                    path.join(currentDirectory, file.name),
+                    file.name
                 );
+                logEvent('files', {
+                    action: 'thumbnail-created',
+                    file: file.name,
+                    path: fileItem.dataset.path
+                });
             } else {
                 iconElement = document.createElement('div');
                 iconElement.className = 'file-icon';
-                iconElement.textContent = getFileIcon(item.name);
+                iconElement.textContent = getFileIcon(file.name);
             }
             
             const fileName = document.createElement('div');
             fileName.className = 'file-name';
-            fileName.textContent = item.name;
+            fileName.textContent = file.name;
             
             fileItem.appendChild(iconElement);
             fileItem.appendChild(fileName);
             
-            if (item.isDirectory()) {
-                fileItem.addEventListener('click', () => {
-                    currentDirectory = path.join(currentDirectory, item.name);
-                    displayCurrentDirectoryContents();
+            // Add click handler for file selection
+            fileItem.addEventListener('click', () => {
+                logEvent('selection', {
+                    type: 'file',
+                    action: 'selected',
+                    file: file.name,
+                    path: fileItem.dataset.path,
+                    isImage: isImageFile(file.name)
                 });
-            }
+                
+                // Remove selected class from all items
+                document.querySelectorAll('.file-item').forEach(item => {
+                    if (item.classList.contains('selected')) {
+                        logEvent('selection', {
+                            type: 'file',
+                            action: 'deselected',
+                            file: item.querySelector('.file-name').textContent,
+                            path: item.dataset.path
+                        });
+                    }
+                    item.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked item
+                fileItem.classList.add('selected');
+            });
             
             filesGrid.appendChild(fileItem);
         });
     } catch (error) {
-        console.error(`Error reading directory ${currentDirectory}:`, error);
+        console.error('Error in displayCurrentDirectoryContents:', error); // Debug log
+        logEvent('error', { 
+            type: 'directory-read', 
+            directory: currentDirectory, 
+            error: error.message,
+            stack: error.stack
+        });
         showError('Error reading directory contents.');
     }
 }

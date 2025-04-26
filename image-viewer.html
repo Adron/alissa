@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .viewer-image {
+            display: block;
+            object-fit: contain;
+        }
+
+        .enlarge-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 1000;
+        }
+
+        body:hover .enlarge-button {
+            opacity: 1;
+        }
+
+        .enlarge-button:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .enlarge-icon {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="image-container">
+        <img id="viewer-image" class="viewer-image">
+        <button class="enlarge-button" id="enlarge-button">
+            <svg class="enlarge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            Full Size
+        </button>
+    </div>
+    <script src="image-viewer.js"></script>
+</body>
+</html> 
