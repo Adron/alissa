@@ -12,6 +12,8 @@ const currentPathDisplay = document.getElementById('current-path');
 // State
 let rootDirectory = '';
 let currentDirectory = '';
+let isFileLoading = false;
+let currentFileStream = null;
 
 // Platform detection
 const platform = os.platform();
@@ -313,7 +315,7 @@ function buildDirectoryTree(directory) {
                 // Add click handler for selection
                 itemContent.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    console.log('Folder clicked:', folder.name); // Debug log
+                    console.log('Folder clicked:', folder.name);
                     
                     // Log selection before any changes
                     logEvent('navigation', { 
@@ -339,7 +341,7 @@ function buildDirectoryTree(directory) {
                     // Add selected class to clicked item
                     li.classList.add('selected');
                     
-                    // Update current directory and display contents
+                    // Update current directory
                     const previousDirectory = currentDirectory;
                     currentDirectory = folderPath;
                     
@@ -351,7 +353,8 @@ function buildDirectoryTree(directory) {
                         to: folderPath
                     });
                     
-                    displayCurrentDirectoryContents();
+                    // Start loading files in the background
+                    startFileLoading();
                     
                     // Toggle expand/collapse
                     const isHidden = subUl.style.display === 'none';
@@ -424,95 +427,120 @@ function buildDirectoryTree(directory) {
     buildTree(directory, rootSubUl);
 }
 
-// Modify displayCurrentDirectoryContents to ensure events are sent
-function displayCurrentDirectoryContents() {
-    console.log('Displaying contents for:', currentDirectory); // Debug log
-    logEvent('files', { 
-        action: 'displaying', 
-        directory: currentDirectory 
-    });
+// New function to start file loading
+function startFileLoading() {
+    // Clear any existing file loading
+    if (currentFileStream) {
+        currentFileStream = null;
+    }
     
+    // Clear the files grid and update path display
     filesGrid.innerHTML = '';
     currentPathDisplay.textContent = currentDirectory;
+    
+    // Start loading files
+    loadFilesStream();
+}
+
+// New function to load files in a streaming fashion
+function loadFilesStream() {
+    if (isFileLoading) return;
+    isFileLoading = true;
     
     try {
         const items = fs.readdirSync(currentDirectory, { withFileTypes: true });
         const files = items
             .filter(item => !item.isDirectory())
             .sort((a, b) => a.name.localeCompare(b.name));
-            
-        // Log the file list
+        
+        // Log the start of file loading
         logEvent('files', { 
-            action: 'read', 
-            directory: currentDirectory,
-            totalItems: items.length,
-            filesFound: files.length,
-            files: files.map(f => ({
-                name: f.name,
-                isImage: isImageFile(f.name)
-            }))
+            action: 'displaying', 
+            directory: currentDirectory 
         });
         
-        files.forEach(file => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.dataset.path = path.join(currentDirectory, file.name);
-            
-            let iconElement;
-            if (isImageFile(file.name)) {
-                iconElement = createImageThumbnail(
-                    path.join(currentDirectory, file.name),
-                    file.name
-                );
-                logEvent('files', {
-                    action: 'thumbnail-created',
-                    file: file.name,
-                    path: fileItem.dataset.path
-                });
-            } else {
-                iconElement = document.createElement('div');
-                iconElement.className = 'file-icon';
-                iconElement.textContent = getFileIcon(file.name);
+        // Process files in chunks
+        const CHUNK_SIZE = 10; // Number of files to process at once
+        let currentIndex = 0;
+        
+        function processNextChunk() {
+            if (currentIndex >= files.length) {
+                isFileLoading = false;
+                return;
             }
             
-            const fileName = document.createElement('div');
-            fileName.className = 'file-name';
-            fileName.textContent = file.name;
+            const chunk = files.slice(currentIndex, currentIndex + CHUNK_SIZE);
+            currentIndex += CHUNK_SIZE;
             
-            fileItem.appendChild(iconElement);
-            fileItem.appendChild(fileName);
-            
-            // Add click handler for file selection
-            fileItem.addEventListener('click', () => {
-                logEvent('selection', {
-                    type: 'file',
-                    action: 'selected',
-                    file: file.name,
-                    path: fileItem.dataset.path,
-                    isImage: isImageFile(file.name)
+            // Process the chunk
+            chunk.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.dataset.path = path.join(currentDirectory, file.name);
+                
+                let iconElement;
+                if (isImageFile(file.name)) {
+                    iconElement = createImageThumbnail(
+                        path.join(currentDirectory, file.name),
+                        file.name
+                    );
+                    logEvent('files', {
+                        action: 'thumbnail-created',
+                        file: file.name,
+                        path: fileItem.dataset.path
+                    });
+                } else {
+                    iconElement = document.createElement('div');
+                    iconElement.className = 'file-icon';
+                    iconElement.textContent = getFileIcon(file.name);
+                }
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                fileItem.appendChild(iconElement);
+                fileItem.appendChild(fileName);
+                
+                // Add click handler for file selection
+                fileItem.addEventListener('click', () => {
+                    logEvent('selection', {
+                        type: 'file',
+                        action: 'selected',
+                        file: file.name,
+                        path: fileItem.dataset.path,
+                        isImage: isImageFile(file.name)
+                    });
+                    
+                    // Remove selected class from all items
+                    document.querySelectorAll('.file-item').forEach(item => {
+                        if (item.classList.contains('selected')) {
+                            logEvent('selection', {
+                                type: 'file',
+                                action: 'deselected',
+                                file: item.querySelector('.file-name').textContent,
+                                path: item.dataset.path
+                            });
+                        }
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked item
+                    fileItem.classList.add('selected');
                 });
                 
-                // Remove selected class from all items
-                document.querySelectorAll('.file-item').forEach(item => {
-                    if (item.classList.contains('selected')) {
-                        logEvent('selection', {
-                            type: 'file',
-                            action: 'deselected',
-                            file: item.querySelector('.file-name').textContent,
-                            path: item.dataset.path
-                        });
-                    }
-                    item.classList.remove('selected');
-                });
-                
-                // Add selected class to clicked item
-                fileItem.classList.add('selected');
+                filesGrid.appendChild(fileItem);
             });
             
-            filesGrid.appendChild(fileItem);
-        });
+            // Schedule next chunk
+            setTimeout(processNextChunk, 0);
+        }
+        
+        // Start processing chunks
+        processNextChunk();
+        
     } catch (error) {
-        console.error('Error in displayCurrentDirectoryContents:', error); // Debug log
+        console.error('Error in loadFilesStream:', error);
         logEvent('error', { 
             type: 'directory-read', 
             directory: currentDirectory, 
@@ -520,6 +548,7 @@ function displayCurrentDirectoryContents() {
             stack: error.stack
         });
         showError('Error reading directory contents.');
+        isFileLoading = false;
     }
 }
 

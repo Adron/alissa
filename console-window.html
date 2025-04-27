@@ -12,24 +12,48 @@
             color: #d4d4d4;
         }
         #console {
-            height: calc(100vh - 20px);
+            height: calc(100vh - 60px);
             overflow-y: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
+            padding: 10px;
+            background-color: #252525;
+            border-radius: 4px;
+            margin-top: 40px;
         }
         .log-entry {
-            margin: 2px 0;
-            padding: 2px 0;
+            margin: 4px 0;
+            padding: 4px 8px;
             border-bottom: 1px solid #333;
+            background-color: #2d2d2d;
+            border-radius: 2px;
         }
         .timestamp {
             color: #6a9955;
+            font-weight: bold;
         }
         .event-type {
             color: #569cd6;
+            font-weight: bold;
         }
         .event-data {
             color: #d4d4d4;
+            margin-left: 8px;
+        }
+        button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        button:hover {
+            background-color: #444;
         }
     </style>
 </head>
