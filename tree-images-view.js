@@ -527,6 +527,14 @@ function loadFilesStream() {
                     
                     // Add selected class to clicked item
                     fileItem.classList.add('selected');
+
+                    // If the file is an image, open it in the viewer
+                    if (isImageFile(file.name)) {
+                        ipcRenderer.send('view-image', {
+                            imagePath: fileItem.dataset.path,
+                            fileName: file.name
+                        });
+                    }
                 });
                 
                 filesGrid.appendChild(fileItem);

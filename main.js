@@ -1,9 +1,10 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
 let mainWindow;
 let consoleWindow = null;
+let imageViewerWindow = null;
 
 function areSettingsValid() {
     try {
@@ -323,4 +324,67 @@ ipcMain.on('exit-app', () => {
 ipcMain.on('open-modal', () => {
     logIPCEvent('open-modal', {});
     openModal();
+});
+
+// Function to create image viewer window
+function createImageViewerWindow() {
+    if (imageViewerWindow && !imageViewerWindow.isDestroyed()) {
+        imageViewerWindow.focus();
+        return;
+    }
+
+    imageViewerWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        },
+        title: 'Image Viewer',
+        backgroundColor: '#1e1e1e'
+    });
+
+    imageViewerWindow.loadFile('image-viewer.html');
+
+    // Handle window resize requests
+    imageViewerWindow.webContents.on('resize-image-viewer', (event, dimensions) => {
+        try {
+            if (imageViewerWindow && !imageViewerWindow.isDestroyed()) {
+                // Add some padding to the window size
+                const padding = 40;
+                imageViewerWindow.setSize(
+                    Math.min(dimensions.width + padding, screen.getPrimaryDisplay().workAreaSize.width),
+                    Math.min(dimensions.height + padding, screen.getPrimaryDisplay().workAreaSize.height)
+                );
+                // Center the window
+                imageViewerWindow.center();
+            }
+        } catch (error) {
+            console.error('Error resizing image viewer:', error);
+        }
+    });
+
+    // Handle image load errors
+    imageViewerWindow.webContents.on('image-load-error', (event, error) => {
+        console.error('Error loading image:', error);
+        if (imageViewerWindow && !imageViewerWindow.isDestroyed()) {
+            imageViewerWindow.webContents.send('show-error', error);
+        }
+    });
+
+    imageViewerWindow.on('closed', () => {
+        imageViewerWindow = null;
+    });
+}
+
+// Handle image view requests
+ipcMain.on('view-image', (event, { imagePath, fileName }) => {
+    try {
+        createImageViewerWindow();
+        if (imageViewerWindow && !imageViewerWindow.isDestroyed()) {
+            imageViewerWindow.webContents.send('load-image', { imagePath, fileName });
+        }
+    } catch (error) {
+        console.error('Error opening image viewer:', error);
+    }
 }); 

@@ -8,64 +8,54 @@
             margin: 0;
             padding: 0;
             background-color: #1e1e1e;
-            overflow: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            overflow: hidden;
         }
-
-        .image-container {
+        #viewer-container {
             position: relative;
-            display: inline-block;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .viewer-image {
-            display: block;
+        #viewer-image {
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
         }
-
-        .enlarge-button {
-            position: fixed;
+        #maximize-button {
+            position: absolute;
             top: 10px;
             right: 10px;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(0, 0, 0, 0.3);
             border: none;
             border-radius: 4px;
-            padding: 8px;
             cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 4px;
-            z-index: 1000;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            transition: background-color 0.2s;
         }
-
-        body:hover .enlarge-button {
-            opacity: 1;
+        #maximize-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
         }
-
-        .enlarge-button:hover {
-            background-color: rgba(0, 0, 0, 0.8);
+        #maximize-button::before {
+            content: '⛶';
         }
-
-        .enlarge-icon {
-            width: 16px;
-            height: 16px;
+        #maximize-button.maximized::before {
+            content: '⛶';
+            transform: rotate(45deg);
         }
     </style>
 </head>
 <body>
-    <div class="image-container">
-        <img id="viewer-image" class="viewer-image">
-        <button class="enlarge-button" id="enlarge-button">
-            <svg class="enlarge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-            </svg>
-            Full Size
-        </button>
+    <div id="viewer-container">
+        <img id="viewer-image" src="" alt="Image Viewer">
+        <button id="maximize-button" title="Toggle Full Resolution"></button>
     </div>
     <script src="image-viewer.js"></script>
 </body>
