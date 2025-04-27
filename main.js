@@ -96,7 +96,7 @@ function closeConsoleWindow() {
     }
 }
 
-// Handle console window toggle
+// Handle console window toggle 
 ipcMain.on('show-console', () => {
     if (consoleWindow) {
         closeConsoleWindow();
@@ -235,12 +235,44 @@ function createWindow() {
             console.error('Error in window resize handler:', error);
         }
     });
+
+    // Add close handler to close all windows when main window is closed
+    mainWindow.on('close', (event) => {
+        try {
+            // Close all windows except the main window
+            const windows = BrowserWindow.getAllWindows();
+            windows.forEach(window => {
+                if (window !== mainWindow && !window.isDestroyed()) {
+                    window.close();
+                }
+            });
+            
+            // Log the main window close event
+            logEvent('window', { action: 'closing', type: 'main' });
+        } catch (error) {
+            console.error('Error in window close handler:', error);
+        }
+    });
 }
 
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
+    try {
+        // Close any remaining windows
+        const windows = BrowserWindow.getAllWindows();
+        windows.forEach(window => {
+            if (!window.isDestroyed()) {
+                window.close();
+            }
+        });
+        
+        // Quit the application
+        if (process.platform !== 'darwin') {
+            app.quit();
+        }
+    } catch (error) {
+        console.error('Error in window-all-closed handler:', error);
         app.quit();
     }
 });
