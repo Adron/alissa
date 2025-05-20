@@ -61,6 +61,14 @@
             color: #95a5a6;
             font-size: 0.9em;
         }
+        .checkmark {
+            display: none;
+            margin-right: 8px;
+            color: #2ecc71;
+        }
+        .checkmark.visible {
+            display: inline-block;
+        }
         #content {
             flex: 1;
             padding: 20px;
@@ -84,8 +92,18 @@
                 <div class="submenu">
                     <div class="submenu-item" id="fullscreen">Full Screen<span class="shortcut">F11</span></div>
                     <div class="separator"></div>
-                    <div class="submenu-item" id="image-preview">Image Preview</div>
-                    <div class="submenu-item" id="floating-image">Floating Image</div>
+                    <div class="submenu-item" id="folder-navigation">
+                        <span class="checkmark">✓</span>
+                        Folder Navigation
+                    </div>
+                    <div class="submenu-item" id="image-preview">
+                        <span class="checkmark">✓</span>
+                        Image Preview
+                    </div>
+                    <div class="submenu-item" id="floating-image">
+                        <span class="checkmark">✓</span>
+                        Floating Image
+                    </div>
                 </div>
             </div>
             <div class="menu-item">
