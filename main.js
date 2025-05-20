@@ -159,6 +159,39 @@ function createWindow() {
   ipcMain.on('save-settings', (event, settings) => {
     saveSettings(settings);
   });
+
+  // File system IPC handlers
+  ipcMain.handle('get-folder-contents', async (event, folderPath) => {
+    try {
+        const items = await fs.promises.readdir(folderPath, { withFileTypes: true });
+        return items
+            .filter(item => item.isDirectory())
+            .map(item => ({
+                name: item.name,
+                path: path.join(folderPath, item.name),
+                isDirectory: true
+            }));
+    } catch (error) {
+        console.error('Error reading folder:', error);
+        return [];
+    }
+  });
+
+  ipcMain.handle('get-default-pictures-folder', () => {
+    const platform = process.platform;
+    const homeDir = os.homedir();
+
+    switch (platform) {
+        case 'win32':
+            return path.join(homeDir, 'Pictures');
+        case 'darwin':
+            return path.join(homeDir, 'Pictures');
+        case 'linux':
+            return path.join(homeDir, 'Pictures');
+        default:
+            return homeDir;
+    }
+  });
 }
 
 // This method will be called when Electron has finished

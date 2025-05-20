@@ -73,6 +73,83 @@
             flex: 1;
             padding: 20px;
             overflow: auto;
+            display: flex;
+        }
+        #folder-navigation-panel {
+            width: 33%;
+            min-width: 200px;
+            max-width: 50%;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            display: none;
+            overflow: auto;
+            position: relative;
+        }
+        #folder-navigation-panel.visible {
+            display: block;
+        }
+        #resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: col-resize;
+            background-color: transparent;
+        }
+        #resize-handle:hover {
+            background-color: #007bff;
+        }
+        #main-content {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+        .folder-tree {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .folder-tree ul {
+            list-style: none;
+            padding-left: 20px;
+            margin: 0;
+        }
+        .folder-tree li {
+            margin: 0;
+            padding: 0;
+        }
+        .folder-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            user-select: none;
+        }
+        .folder-item:hover {
+            background-color: #e9ecef;
+        }
+        .folder-item.selected {
+            background-color: #e9ecef;
+        }
+        .folder-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+        .folder-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .folder-toggle {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            text-align: center;
+            line-height: 16px;
         }
     </style>
 </head>
@@ -122,8 +199,14 @@
             </div>
         </div>
         <div id="content">
-            <h1>Image Viewer</h1>
-            <p>Welcome to the Image Viewer application. Use the menu above to navigate through the application features.</p>
+            <div id="folder-navigation-panel">
+                <div id="resize-handle"></div>
+                <div id="folder-tree-container"></div>
+            </div>
+            <div id="main-content">
+                <h1>Image Viewer</h1>
+                <p>Welcome to the Image Viewer application. Use the menu above to navigate through the application features.</p>
+            </div>
         </div>
     </div>
     <script src="renderer.js"></script>
