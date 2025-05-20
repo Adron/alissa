@@ -1,16 +1,30 @@
 {
   "name": "alissa-web-viewer",
   "version": "1.0.0",
-  "description": "Alissa Web Viewer Application",
+  "description": "An Electron application for viewing images",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "build": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": ["electron", "image-viewer"],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "electron": "^28.0.0",
-    "sharp": "^0.34.1"
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.alissa.webviewer",
+    "mac": {
+      "category": "public.app-category.graphics-design"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
