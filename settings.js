@@ -43,4 +43,11 @@ document.getElementById('save-button').addEventListener('click', () => {
 // Handle cancel button click
 document.getElementById('cancel-button').addEventListener('click', () => {
     window.close();
+});
+
+// Handle ESC key press
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        window.close();
+    }
 }); 
